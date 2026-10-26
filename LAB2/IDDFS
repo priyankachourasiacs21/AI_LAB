@@ -1,0 +1,51 @@
+def dls(tree, node, target, depth):
+    print("Visiting:", node, "| Depth limit:", depth)
+
+    if node == target:
+        return True
+
+    if depth == 0:
+        return False
+
+    for child in tree.get(node, []):
+        if dls(tree, child, target, depth - 1):
+            return True
+
+    return False
+
+
+def iddfs(tree, start, target, max_depth):
+    for depth in range(max_depth + 1):
+        print(f"\nIteration with depth limit: {depth}")
+
+        if dls(tree, start, target, depth):
+            print("\nTarget found:", target)
+            return True
+
+    print("\nTarget not found.")
+    return False
+
+
+# Define the tree
+tree = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F', 'G'],
+    'D': [],
+    'E': [],
+    'F': [],
+    'G': []
+}
+
+start = input("Enter starting node: ").upper()
+target = input("Enter target node: ").upper()
+max_depth = int(input("Enter maximum depth: "))
+
+if start not in tree:
+    print("Starting node does not exist.")
+elif target not in tree:
+    print("Target node does not exist.")
+elif max_depth < 0:
+    print("Maximum depth must be non-negative.")
+else:
+    iddfs(tree, start, target, max_depth)
