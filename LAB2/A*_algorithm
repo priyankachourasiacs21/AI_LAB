@@ -1,0 +1,84 @@
+import heapq
+
+def heuristic(board):
+    n = len(board)
+    conflicts = 0
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if (board[i] == board[j] or
+                abs(board[i] - board[j]) == abs(i - j)):
+                conflicts += 1
+
+    return conflicts
+
+
+def print_board(board):
+    n = len(board)
+    for row in range(n):
+        print(" ".join(
+            "Q" if board[col] == row else "."
+            for col in range(n)
+        ))
+
+
+def a_star(n):
+    start = ()
+    open_list = []
+    heapq.heappush(open_list, (0, 0, start))
+
+    visited = set()
+    iteration = 0
+
+    while open_list:
+        f, g, board = heapq.heappop(open_list)
+
+        if board in visited:
+            continue
+
+        visited.add(board)
+
+        print(f"\nIteration {iteration}")
+        print("Board:", board)
+        print("g(n):", g)
+        print("h(n):", heuristic(board))
+        print("f(n):", f)
+
+        if len(board) == n and heuristic(board) == 0:
+            print("\nSolution found!")
+            return board
+
+        print_board(board + (-1,) * (n - len(board))) if len(board) == n else None
+
+        row = len(board)
+
+        for col in range(n):
+            if all(
+                board[i] != col and
+                abs(board[i] - col) != abs(i - row)
+                for i in range(len(board))
+            ):
+                neighbor = board + (col,)
+                new_g = g + 1
+                h = heuristic(neighbor)
+                new_f = new_g + h
+
+                if neighbor not in visited:
+                    heapq.heappush(
+                        open_list,
+                        (new_f, new_g, neighbor)
+                    )
+
+        iteration += 1
+
+    print("\nNo solution found.")
+    return None
+
+
+n = int(input("Enter number of queens: "))
+solution = a_star(n)
+
+if solution is not None:
+    print("\nFinal Solution:")
+    print_board(solution)
+    print("Final heuristic:", heuristic(solution))
