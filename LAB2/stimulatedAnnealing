@@ -1,0 +1,95 @@
+import random
+import math
+
+def heuristic(board):
+    n = len(board)
+    conflicts = 0
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if (board[i] == board[j] or
+                abs(board[i] - board[j]) == abs(i - j)):
+                conflicts += 1
+
+    return conflicts
+
+
+def print_board(board):
+    n = len(board)
+    for row in range(n):
+        print(" ".join(
+            "Q" if board[col] == row else "."
+            for col in range(n)
+        ))
+
+
+def simulated_annealing(n):
+    board = [random.randint(0, n - 1) for _ in range(n)]
+
+    temperature = 10.0
+    cooling_rate = 0.90
+    min_temperature = 0.1
+    iteration = 0
+
+    while temperature > min_temperature:
+        current_h = heuristic(board)
+
+        print(f"\nIteration {iteration}")
+        print("Board:", board)
+        print("Heuristic:", current_h)
+        print("Temperature:", round(temperature, 3))
+        print_board(board)
+
+        if current_h == 0:
+            print("\nSolution found!")
+            return board
+
+        # Generate a neighboring state
+        col = random.randint(0, n - 1)
+        row = random.randint(0, n - 1)
+
+        neighbor = board[:]
+        neighbor[col] = row
+
+        new_h = heuristic(neighbor)
+        delta = new_h - current_h
+
+        # Decide whether to accept the new state
+        if delta < 0:
+            board = neighbor
+            print("Move accepted: better state")
+
+        elif delta == 0:
+            board = neighbor
+            print("Move accepted: equal state")
+
+        else:
+            probability = math.exp(-delta / temperature)
+            random_value = random.random()
+
+            if random_value < probability:
+                board = neighbor
+                print("Move accepted: worse state")
+                print("Probability:", round(probability, 3))
+            else:
+                print("Move rejected")
+                print("Probability:", round(probability, 3))
+
+        temperature *= cooling_rate
+        iteration += 1
+
+    if heuristic(board) == 0:
+        print("\nSolution found!")
+        return board
+
+    print("\nTemperature too low. No solution found.")
+    return None
+
+
+n = int(input("Enter number of queens: "))
+solution = simulated_annealing(n)
+
+if solution is not None:
+    print("\nFinal Solution:")
+    print_board(solution)
+    print("Final heuristic:", heuristic(solution))
